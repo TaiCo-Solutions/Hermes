@@ -170,6 +170,7 @@ def detalle_servicio(lineas=[], servicio=0, exoneracion=0, tipo_exoneracion=1, d
         iva_code = line.get('codigo_impuesto')
         iva_tarif = line.get('tarifa_impuesto')
         iva_percentage = line.get('porcentaje_impuesto')
+        cabys = line.get("cabys")
         porcentaje_exoneracion = int(line.get('porcentaje_exoneracion'))
         if porcentaje_exoneracion > 0:
             if porcentaje_exoneracion > int(iva_percentage):
@@ -240,7 +241,11 @@ def detalle_servicio(lineas=[], servicio=0, exoneracion=0, tipo_exoneracion=1, d
             bill_lines = f"""{bill_lines}
                         <LineaDetalle>
                             <NumeroLinea>{line_number}</NumeroLinea>
-                            <Codigo>{line.get('codigo')}</Codigo>
+                            <Codigo>{line.get('cabys')}</Codigo>
+                            <CodigoComercial>
+                                <Tipo>01</Tipo>
+                                <Codigo>{line.get('codigo')}</Codigo>
+                            </CodigoComercial>
                             <Cantidad>{amount:.3f}</Cantidad>
                             <UnidadMedida>{unit}</UnidadMedida>
                             {description}

@@ -257,7 +257,8 @@ class ElectronicDocument:
                                   'precio': row[2], 'descuento': row[3], 'impuesto': row[4], 'porcentaje_impuesto': row[5], 'total': row[6], 
                                   'porcentaje_exoneracion': row[7],
                                   'unidad': article_dictionary.get("unit"), 'codigo_impuesto': article_dictionary.get("iva_code"),
-                                  'tarifa_impuesto': article_dictionary.get("iva_tarif"), })
+                                  'tarifa_impuesto': article_dictionary.get("iva_tarif"), 
+                                  'cabys': article_dictionary.get('cabys')})
 
         return lines
 
