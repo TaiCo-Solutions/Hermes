@@ -275,46 +275,49 @@ def html_creator(bill_key, user_data, doc_data, client, bill_remarks, subtotal, 
             <tr>
             </tr>
             <tr>
-                <td colspan=4 rowspan=6>
+                <td colspan=4 rowspan=9>
                     {}<br/>
                     <b>Clave:</b>
                     <br/>{}<br/><br/>
                     <b>Observaciones</b>
                     <br/>{}<br/>
                 </td>
-                <tr>
-                    <th align="right" class="total-header">Total Gravado</th>
-                    <td align="right" class="table-total">{:,.3f}</td>
-                </tr>
-                <tr>
-                    <th align="right" class="total-header">Total Exento</th>
-                    <td align="right" class="table-total">{:,.3f}</td>
-                </tr>
-                <tr>
-                    <th align="right" class="total-header">Total Exonerado</th>
-                    <td align="right" class="table-total">{:,.3f}</td>
-                </tr>                
-                <tr>
-                    <th align="right" class="total-header">SubTotal</th>
-                    <td align="right" class="table-total">{:,.3f}</td>
-                </tr>
-                <tr>
-                    <th align="right" class="total-header">Descuento</th>
-                    <td align="right" class="table-total">{:,.3f}</td>
-                </tr>
-                <tr>
-                    <th align="right" class="total-header">Venta Neta</th>
-                    <td align="right" class="table-total">{:,.3f}</td>
-                </tr>
-                {}
-                <tr>
-                    <th align="right" class="total-header">Impuesto</th>
-                    <td align="right" class="table-total">{:,.3f}</td>
-                </tr>
-                <tr>
-                    <th align="right" class="total-header">Total</th>
-                    <td align="right" class="table-total">{:,.3f}</td>
-                </tr>             
+                <td>
+                    <tr>
+                        <th align="right" class="total-header">Total Gravado</th>
+                        <td align="right" class="table-total">{:,.3f}</td>
+                    </tr>
+                    <tr>
+                        <th align="right" class="total-header">Total Exento</th>
+                        <td align="right" class="table-total">{:,.3f}</td>
+                    </tr>
+                    <tr>
+                        <th align="right" class="total-header">Total Exonerado</th>
+                        <td align="right" class="table-total">{:,.3f}</td>
+                    </tr>                
+                    <tr>
+                        <th align="right" class="total-header">SubTotal</th>
+                        <td align="right" class="table-total">{:,.3f}</td>
+                    </tr>
+                    <tr>
+                        <th align="right" class="total-header">Descuento</th>
+                        <td align="right" class="table-total">{:,.3f}</td>
+                    </tr>
+                    <tr>
+                        <th align="right" class="total-header">Venta Neta</th>
+                        <td align="right" class="table-total">{:,.3f}</td>
+                    </tr>
+                    {}
+                    <tr>
+                        <th align="right" class="total-header">Impuesto</th>
+                        <td align="right" class="table-total">{:,.3f}</td>
+                    </tr>
+                    <tr>
+                        <th align="right" class="total-header">Total</th>
+                        <td align="right" class="table-total">{:,.3f}</td>
+                    </tr>             
+                </td>
+            </tr>
         </table>
     </div>
     """.format(exoneration, bill_key, bill_remarks, float(gravado),
@@ -443,10 +446,37 @@ def create_pdf(user_data, document, doc_flag=0):
                        "MontoTotalLinea": 0, "Impuesto": {"Codigo": 1, "Monto": 0}}
 
         try:
+
+            for line in element:
+                if "Impuesto" in line:
+                    if "Exoneracion" in line["Impuesto"]:
+                        exonet = line["Impuesto"]["Exoneracion"]
+                        exo_str = f"""Documento de exoneracion: {exonet["NumeroDocumento"]}"""
+                    else:
+                        exo_str = ""
+                else:
+                    exo_str = ""
+                temp_dict = {"amount": line["Cantidad"],
+                             "price": line["PrecioUnitario"],
+                             "total": line["MontoTotalLinea"],
+                             "exonet": exo_str,
+                             "cabys": line["Codigo"],
+                             "description": line["Detalle"]}
+
+                if "Descuento" in line:
+                    temp_dict["discount"] = line["Descuento"]["MontoDescuento"]
+                else:
+                    temp_dict["discount"] = 0
+
+                temp_dict["tax_total"] = 0
+                temp_dict["service"] = 0
+
+                doc_lines.append(temp_dict)
+
+        except:
             if "Impuesto" in element:
                 if "Exoneracion" in element["Impuesto"]:
                     exonet = element["Impuesto"]["Exoneracion"]
-                    print(exonet)
                     exo_str = f"""Documento de exoneracion: {exonet["NumeroDocumento"]}"""
                 else:
                     exo_str = ""
@@ -466,33 +496,6 @@ def create_pdf(user_data, document, doc_flag=0):
                 temp_dict["discount"] = 0
 
             doc_lines.append(temp_dict)
-        except:
-
-            for line in element:
-                if "Impuesto" in line:
-                    if "Exoneracion" in line["Impuesto"]:
-                        exonet = line["Impuesto"]["Exoneracion"]
-                        exo_str = f"""Documento de exoneracion: {exonet["NumeroDocumento"]}"""
-                    else:
-                        exo_str = ""
-                else:
-                    exo_str = ""
-                temp_dict = {"description": line["Detalle"],
-                             "amount": line["Cantidad"],
-                             "price": line["PrecioUnitario"],
-                             "total": line["MontoTotalLinea"],
-                             "exonet": exo_str,
-                             "cabys": element["Codigo"]}
-
-                if "Descuento" in line:
-                    temp_dict["discount"] = line["Descuento"]["MontoDescuento"]
-                else:
-                    temp_dict["discount"] = 0
-
-                temp_dict["tax_total"] = 0
-                temp_dict["service"] = 0
-
-                doc_lines.append(temp_dict)
 
         doc_data["doc_lines"] = doc_lines
 
